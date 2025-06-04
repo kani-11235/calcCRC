@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>CRC 計算ツール</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    input, button {
+      margin: 10px 0;
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>CRC 計算ツール</h1>
+
+  <label for="dataInput">データ (bit列)：</label><br>
+  <input type="text" id="dataInput" placeholder="例: 1101011011"><br>
+
+  <label for="plyInput">生成多項式 (bit列)：</label><br>
+  <input type="text" id="plyInput" placeholder="例: 10011"><br>
+
+  <button onclick="calculateCRC()">CRC計算</button>
+
+  <h2>CRC値:</h2>
+  <div id="result"></div>
+
+  <script>
+    function calcCRC(data, ply) {
+      let bitList = data.split('').map(Number);
+      let plyList = ply.split('').map(Number);
+      let add = Array(plyList.length - 1).fill(0);
+      bitList = bitList.concat(add);
+
+      let length = plyList.length;
+      let tempBitList = bitList.slice(0, length);
+      let lim = 0;
+
+      for (let i = length; i < bitList.length; i++) {
+        lim += 1;
+        if (tempBitList[0] !== 0) {
+          tempBitList = tempBitList.map((bit, index) => bit ^ plyList[index]);
+        }
+
+        if (lim === bitList.length - length) {
+          break;
+        } else if (tempBitList[0] === 0) {
+          tempBitList = tempBitList.slice(1);
+          tempBitList.push(bitList[i]);
+        }
+      }
+
+      if (tempBitList[0] === 0) {
+        tempBitList = tempBitList.slice(1);
+      }
+
+      return tempBitList;
+    }
+
+    function calculateCRC() {
+      const data = document.getElementById("dataInput").value;
+      const ply = document.getElementById("plyInput").value;
+
+      if (!/^[01]+$/.test(data) || !/^[01]+$/.test(ply)) {
+        document.getElementById("result").textContent = "エラー: 0と1のみを入力してください。";
+        return;
+      }
+
+      const crc = calcCRC(data, ply);
+      document.getElementById("result").textContent = crc.join("");
+    }
+  </script>
+</body>
+</html>
